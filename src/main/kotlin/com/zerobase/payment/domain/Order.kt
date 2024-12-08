@@ -16,6 +16,6 @@ class Order(
 
     val orderTitle: String, // 불변 값은 val
     val orderAmount: Long,
-    var paidAmount: Long, // 변할 수 있는 값은 var
-    var refundAmount: Long,
+    var paidAmount: Long = 0, // 변할 수 있는 값은 var
+    var refundAmount: Long = 0,
 ) : BaseEntity() // BaseEntity의 기본 생성자를 바탕으로 생성하겠다.
