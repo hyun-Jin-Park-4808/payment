@@ -1,5 +1,6 @@
 package com.zerobase.payment.repository
 
+import com.zerobase.payment.TransactionType
 import com.zerobase.payment.domain.Order
 import com.zerobase.payment.domain.OrderTransaction
 import com.zerobase.payment.domain.PaymentUser
@@ -14,5 +15,8 @@ interface OrderRepository : JpaRepository<Order, Long> {
 }
 
 interface OrderTransactionRepository : JpaRepository<OrderTransaction, Long> {
-
+    fun findByOrderAndTransactionType(
+        order: Order,
+        transactionType: TransactionType
+    ): List<OrderTransaction>
 }

@@ -14,8 +14,8 @@ abstract class BaseEntity {
     var id: Long? = null
 
     @CreatedDate
-    lateinit var createAt: LocalDateTime
+    lateinit var createdAt: LocalDateTime
 
     @LastModifiedDate
-    lateinit var updateAt: LocalDateTime
+    lateinit var updatedAt: LocalDateTime
 }

@@ -1,11 +1,14 @@
 package com.zerobase.payment.service
 
+import com.zerobase.payment.exception.ErrorCode
+import com.zerobase.payment.exception.PaymentException
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
 class PaymentService(
-    private val paymentStatusService: PaymentStatusService
+    private val paymentStatusService: PaymentStatusService,
+    private val accountService: AccountService,
 ) {
 
     fun pay(
@@ -18,18 +21,32 @@ class PaymentService(
             orderTitle = payServiceRequest.orderTitle,
             merchantTransactionId = payServiceRequest.merchantTransactionId,
         )
-        // 계좌에 금액 사용 요청
-        
-        // 성공: 거래를 성공으로 저장
-        // 실패: 거래를 실패로 저장
+        return try {
+            // 계좌에 금액 사용 요청
+            val payMethodTransactionId = accountService.useAccount(orderId)
 
-        return PayServiceResponse(
-            payUserId = "payUserId",
-            amount = 100,
-            transactionId = "transactionId",
-            transactedAt = LocalDateTime.now(),
-        )
+            // 성공: 거래를 성공으로 저장
+            val (transactionId, transactedAt) = paymentStatusService.saveAsSuccess(
+                orderId,
+                payMethodTransactionId
+            )
+
+            PayServiceResponse(
+                payUserId = payServiceRequest.payUserId,
+                amount = payServiceRequest.amount,
+                transactionId = transactionId,
+                transactedAt = transactedAt,
+            )
+        } catch (e: Exception) {
+            // 실패: 거래를 실패로 저장
+            paymentStatusService.saveAsFailure(orderId, getErrorCode(e))
+
+            throw e
+        }
     }
+
+    fun getErrorCode(e: Exception) = if (e is PaymentException) e.errorCode
+    else ErrorCode.INTERNAL_SERVER_ERROR
 }
 
 data class PayServiceResponse(

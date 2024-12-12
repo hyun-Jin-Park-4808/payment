@@ -2,13 +2,11 @@ package com.zerobase.payment.domain
 
 import com.zerobase.payment.TransactionStatus
 import com.zerobase.payment.TransactionType
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
+@Table(name = "order_transaction")
 class OrderTransaction(
     val transactionId: String,
 
@@ -19,7 +17,7 @@ class OrderTransaction(
     val transactionType: TransactionType,
 
     @Enumerated(EnumType.STRING)
-    val transactionStatus: TransactionStatus,
+    var transactionStatus: TransactionStatus,
 
     val transactionAmount: Long,
     val merchantTransactionId: String,
