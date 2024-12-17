@@ -1,6 +1,8 @@
 package com.zerobase.payment.service
 
+import com.zerobase.payment.TransactionType
 import com.zerobase.payment.adapter.AccountAdapter
+import com.zerobase.payment.adapter.CancelBalanceRequest
 import com.zerobase.payment.adapter.UseBalanceRequest
 import com.zerobase.payment.domain.Order
 import com.zerobase.payment.exception.ErrorCode
@@ -27,6 +29,29 @@ class AccountService(
                 userId = order.paymentUser.accountUserId,
                 accountNumber = order.paymentUser.accountNumber,
                 amount = order.orderAmount
+            )
+        ).transactionId
+    }
+
+    @Transactional
+    fun cancelUseAccount(refundTxId: Long): String {
+        val refundTransaction = orderTransactionRepository.findById(refundTxId)
+            .orElseThrow {
+                throw PaymentException(ErrorCode.INTERNAL_SERVER_ERROR)
+            }
+
+        // refundTx -> order -> paymentTx.payMethodTransactionId
+        val order = refundTransaction.order
+        val paymentTransaction = orderTransactionRepository.findByOrderAndTransactionType(
+            order, TransactionType.PAYMENT
+        ).first()
+
+        return accountAdapter.cancelUseAccount(
+            CancelBalanceRequest(
+                transactionId = paymentTransaction.payMethodTransactionId
+                    ?: throw PaymentException(ErrorCode.INTERNAL_SERVER_ERROR),
+                accountId = order.paymentUser.accountNumber,
+                amount = refundTransaction.transactionAmount
             )
         ).transactionId
     }

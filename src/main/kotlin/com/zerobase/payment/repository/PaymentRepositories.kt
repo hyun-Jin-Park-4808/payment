@@ -19,4 +19,6 @@ interface OrderTransactionRepository : JpaRepository<OrderTransaction, Long> {
         order: Order,
         transactionType: TransactionType
     ): List<OrderTransaction>
+
+    fun findByTransactionId(transactionId: String): OrderTransaction?
 }
